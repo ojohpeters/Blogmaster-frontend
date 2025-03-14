@@ -11,16 +11,13 @@ import { PageTransition } from "@/components/page-transition"
 import { motion } from "framer-motion"
 import { Badge } from "@/components/ui/badge"
 
+// Revert the interface to the original structure without the nested description object
 interface SubscriptionPlan {
   id: number
   name: string
   price: string
   daily_limit: number
   duration: number
-  description: {
-    title: string
-    details: string[]
-  }
 }
 
 export default function PricingPage() {
@@ -178,14 +175,41 @@ export default function PricingPage() {
                       <span className="text-sm font-normal text-muted-foreground"> / month</span>
                     </CardDescription>
                   </CardHeader>
+                  {/* In the CardContent section, replace the plan.description.details mapping with the original hardcoded features */}
                   <CardContent className="flex-grow space-y-4">
                     <ul className="space-y-3">
-                      {plan.description.details.map((detail, index) => (
-                        <li key={index} className="flex items-start">
+                      <li className="flex items-start">
+                        <CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                        <span>
+                          <strong>{plan.daily_limit}</strong> requests per day
+                        </span>
+                      </li>
+                      <li className="flex items-start">
+                        <CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                        <span>
+                          <strong>{plan.duration}</strong> days of access
+                        </span>
+                      </li>
+                      <li className="flex items-start">
+                        <CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                        <span>AI-powered paraphrasing</span>
+                      </li>
+                      <li className="flex items-start">
+                        <CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                        <span>WordPress integration</span>
+                      </li>
+                      {plan.name !== "Basic" && (
+                        <li className="flex items-start">
                           <CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                          <span>{detail}</span>
+                          <span>Priority support</span>
                         </li>
-                      ))}
+                      )}
+                      {plan.name === "Ultimate" && (
+                        <li className="flex items-start">
+                          <CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                          <span>Advanced SEO tools</span>
+                        </li>
+                      )}
                     </ul>
                   </CardContent>
                   <CardFooter>

@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { Home, CreditCard, User, Menu, FileText, RefreshCw } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -105,14 +104,14 @@ export function MobileNav({ onLogout }: { onLogout?: () => void }) {
   return (
     <>
       {/* Mobile Navigation */}
-      <div className="fixed bottom-0 left-0 z-40 w-full border-t bg-background md:hidden">
+      <div className="fixed bottom-0 left-0 z-50 w-full border-t bg-background md:hidden">
         <div className="grid h-16 grid-cols-4">
           {routes.slice(0, 4).map((route) => {
             const Icon = route.icon
             const isActive = pathname === route.href
 
             return (
-              <Link
+              <a
                 key={route.href}
                 href={route.href}
                 className={cn(
@@ -122,14 +121,14 @@ export function MobileNav({ onLogout }: { onLogout?: () => void }) {
               >
                 <Icon className={cn("h-5 w-5", isActive && "text-primary")} />
                 <span className="text-xs">{route.label}</span>
-              </Link>
+              </a>
             )
           })}
         </div>
       </div>
 
       {/* Mobile Menu Button (for more options) */}
-      <div className="fixed right-4 top-4 z-40 md:hidden">
+      <div className="fixed right-4 top-4 z-50 md:hidden">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
             <Button variant="outline" size="icon" className="rounded-full">
@@ -163,7 +162,7 @@ export function MobileNav({ onLogout }: { onLogout?: () => void }) {
                   const isActive = pathname === route.href
 
                   return (
-                    <Link
+                    <a
                       key={route.href}
                       href={route.href}
                       onClick={() => setOpen(false)}
@@ -174,7 +173,7 @@ export function MobileNav({ onLogout }: { onLogout?: () => void }) {
                     >
                       <Icon className="h-5 w-5" />
                       <span>{route.label}</span>
-                    </Link>
+                    </a>
                   )
                 })}
               </nav>

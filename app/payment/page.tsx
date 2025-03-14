@@ -16,10 +16,6 @@ interface SubscriptionPlan {
   price: string
   daily_limit: number
   duration: number
-  description: {
-    title: string
-    details: string[]
-  }
 }
 
 export default function Payment() {
@@ -210,74 +206,55 @@ export default function Payment() {
               <div className="space-y-4">
                 <h3 className="text-sm font-medium text-muted-foreground">Plan Features</h3>
                 <ul className="space-y-3">
-                  {selectedPlan.description && selectedPlan.description.details ? (
-                    selectedPlan.description.details.map((detail, index) => (
-                      <motion.li
-                        key={index}
-                        className="flex items-start"
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.1 * (index + 1) }}
-                      >
-                        <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                        <div>
-                          <span>{detail}</span>
-                        </div>
-                      </motion.li>
-                    ))
-                  ) : (
-                    <>
-                      <motion.li
-                        className="flex items-start"
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.1 }}
-                      >
-                        <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                        <div>
-                          <span className="font-medium">{selectedPlan.daily_limit} requests per day</span>
-                          <p className="text-sm text-muted-foreground">Make the most of our AI-powered tools</p>
-                        </div>
-                      </motion.li>
-                      <motion.li
-                        className="flex items-start"
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2 }}
-                      >
-                        <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                        <div>
-                          <span className="font-medium">{selectedPlan.duration} days of access</span>
-                          <p className="text-sm text-muted-foreground">Full access to all premium features</p>
-                        </div>
-                      </motion.li>
-                      <motion.li
-                        className="flex items-start"
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.3 }}
-                      >
-                        <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                        <div>
-                          <span className="font-medium">AI-powered paraphrasing</span>
-                          <p className="text-sm text-muted-foreground">Create unique content effortlessly</p>
-                        </div>
-                      </motion.li>
-                      {selectedPlan.name !== "Basic" && (
-                        <motion.li
-                          className="flex items-start"
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.4 }}
-                        >
-                          <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                          <div>
-                            <span className="font-medium">Priority support</span>
-                            <p className="text-sm text-muted-foreground">Get help when you need it most</p>
-                          </div>
-                        </motion.li>
-                      )}
-                    </>
+                  <motion.li
+                    className="flex items-start"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 }}
+                  >
+                    <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <span className="font-medium">{selectedPlan.daily_limit} requests per day</span>
+                      <p className="text-sm text-muted-foreground">Make the most of our AI-powered tools</p>
+                    </div>
+                  </motion.li>
+                  <motion.li
+                    className="flex items-start"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <span className="font-medium">{selectedPlan.duration} days of access</span>
+                      <p className="text-sm text-muted-foreground">Full access to all premium features</p>
+                    </div>
+                  </motion.li>
+                  <motion.li
+                    className="flex items-start"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <span className="font-medium">AI-powered paraphrasing</span>
+                      <p className="text-sm text-muted-foreground">Create unique content effortlessly</p>
+                    </div>
+                  </motion.li>
+                  {selectedPlan.name !== "Basic" && (
+                    <motion.li
+                      className="flex items-start"
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.4 }}
+                    >
+                      <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <span className="font-medium">Priority support</span>
+                        <p className="text-sm text-muted-foreground">Get help when you need it most</p>
+                      </div>
+                    </motion.li>
                   )}
                 </ul>
               </div>

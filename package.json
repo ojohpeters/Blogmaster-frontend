@@ -58,15 +58,12 @@
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.6",
     "zod": "latest",
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
-    "tailwindcss": "latest",
     "@emotion/is-prop-valid": "latest",
     "@tailwindcss/typography": "latest",
     "framer-motion": "latest",
-    "@uiw/react-md-editor": "latest",
     "ai": "latest",
-    "@ai-sdk/openai": "latest"
+    "@ai-sdk/openai": "latest",
+    "@uiw/react-md-editor": "latest"
   },
   "devDependencies": {
     "@types/node": "^22",

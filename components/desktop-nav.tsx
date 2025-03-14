@@ -1,7 +1,8 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect } from "react"
-import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -21,6 +22,21 @@ import { useUser } from "@/lib/user-context"
 
 interface DesktopNavProps {
   onLogout?: () => void
+}
+
+// Simplified NavLink component with direct navigation
+const NavLink = ({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) => {
+  return (
+    <a
+      href={href}
+      className={cn(
+        "text-sm font-medium transition-colors hover:text-primary cursor-pointer",
+        active ? "text-foreground" : "text-muted-foreground",
+      )}
+    >
+      {children}
+    </a>
+  )
 }
 
 export function DesktopNav({ onLogout }: DesktopNavProps) {
@@ -95,12 +111,12 @@ export function DesktopNav({ onLogout }: DesktopNavProps) {
     { href: "/pricing", label: "Pricing" },
   ]
 
+  // Update the routes array to ensure proper navigation
   const authRoutes = [
     { href: "/dashboard", label: "Dashboard" },
-    { href: "/make-post", label: "Make Post" },
     { href: "/fetched-posts", label: "Fetched Posts" },
-    { href: "/dashboard/subscription", label: "Subscription" },
     { href: "/url-paraphraser", label: "URL Paraphraser" },
+    { href: "/dashboard/subscription", label: "Subscription" },
   ]
 
   const routes = isAuthenticated ? authRoutes : publicRoutes
@@ -112,24 +128,17 @@ export function DesktopNav({ onLogout }: DesktopNavProps) {
   }
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-6 md:gap-10">
-          <Link href="/" className="hidden items-center space-x-2 md:flex">
+          <a href="/" className="hidden items-center space-x-2 md:flex">
             <span className="hidden font-bold sm:inline-block">BlogMaster</span>
-          </Link>
+          </a>
           <nav className="hidden gap-6 md:flex">
             {routes.map((route) => (
-              <Link
-                key={route.href}
-                href={route.href}
-                className={cn(
-                  "flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground",
-                  pathname === route.href && "text-foreground",
-                )}
-              >
+              <NavLink key={route.href} href={route.href} active={pathname === route.href}>
                 {route.label}
-              </Link>
+              </NavLink>
             ))}
           </nav>
         </div>
@@ -154,10 +163,10 @@ export function DesktopNav({ onLogout }: DesktopNavProps) {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/dashboard/profile" className="cursor-pointer">
+                  <a href="/dashboard/profile" className="cursor-pointer">
                     <User className="mr-2 h-4 w-4" />
                     <span>Profile</span>
-                  </Link>
+                  </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={handleLogout}
@@ -170,14 +179,14 @@ export function DesktopNav({ onLogout }: DesktopNavProps) {
             </DropdownMenu>
           ) : (
             <div className="flex items-center gap-2">
-              <Link href="/auth/login">
+              <a href="/auth/login">
                 <Button variant="ghost" size="sm">
                   Login
                 </Button>
-              </Link>
-              <Link href="/auth/register">
+              </a>
+              <a href="/auth/register">
                 <Button size="sm">Sign Up</Button>
-              </Link>
+              </a>
             </div>
           )}
         </div>

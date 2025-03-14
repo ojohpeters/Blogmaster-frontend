@@ -18,10 +18,6 @@ interface Plan {
   price: string
   daily_limit: number
   duration: number
-  description: {
-    title: string
-    details: string[]
-  }
 }
 
 interface SubscriptionDetails {
@@ -152,20 +148,40 @@ export default function Subscription() {
                   <div className="grid gap-6 sm:grid-cols-2">
                     <div className="space-y-4">
                       {subscription.plan.description && subscription.plan.description.details ? (
-                        subscription.plan.description.details.slice(0, 3).map((detail, index) => (
+                        <div className="space-y-4">
                           <motion.div
-                            key={index}
-                            className="flex items-start"
+                            className="flex items-center"
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.1 * (index + 1) }}
+                            transition={{ delay: 0.1 }}
                           >
-                            <CheckCircle className="h-5 w-5 mr-3 mt-0.5 flex-shrink-0 text-green-500" />
-                            <div>
-                              <span>{detail}</span>
-                            </div>
+                            <CreditCard className="h-5 w-5 mr-2 text-muted-foreground" />
+                            <span className="text-muted-foreground mr-2">Price:</span>
+                            <span className="font-medium">{formatCurrency(subscription.plan.price)}</span>
                           </motion.div>
-                        ))
+
+                          <motion.div
+                            className="flex items-center"
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.2 }}
+                          >
+                            <BarChart className="h-5 w-5 mr-2 text-muted-foreground" />
+                            <span className="text-muted-foreground mr-2">Daily Limit:</span>
+                            <span className="font-medium">{subscription.plan.daily_limit} requests</span>
+                          </motion.div>
+
+                          <motion.div
+                            className="flex items-center"
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.3 }}
+                          >
+                            <Clock className="h-5 w-5 mr-2 text-muted-foreground" />
+                            <span className="text-muted-foreground mr-2">Duration:</span>
+                            <span className="font-medium">{subscription.plan.duration} days</span>
+                          </motion.div>
+                        </div>
                       ) : (
                         <>
                           <motion.div
@@ -285,20 +301,40 @@ export default function Subscription() {
                   <div className="grid gap-6 sm:grid-cols-2">
                     <div className="space-y-4">
                       {subscription.plan.description && subscription.plan.description.details ? (
-                        subscription.plan.description.details.slice(0, 3).map((detail, index) => (
+                        <div className="space-y-4">
                           <motion.div
-                            key={index}
-                            className="flex items-start"
+                            className="flex items-center"
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.1 * (index + 1) }}
+                            transition={{ delay: 0.1 }}
                           >
-                            <CheckCircle className="h-5 w-5 mr-3 mt-0.5 flex-shrink-0 text-green-500" />
-                            <div>
-                              <span>{detail}</span>
-                            </div>
+                            <CreditCard className="h-5 w-5 mr-2 text-muted-foreground" />
+                            <span className="text-muted-foreground mr-2">Price:</span>
+                            <span className="font-medium">{formatCurrency(subscription.plan.price)}</span>
                           </motion.div>
-                        ))
+
+                          <motion.div
+                            className="flex items-center"
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.2 }}
+                          >
+                            <BarChart className="h-5 w-5 mr-2 text-muted-foreground" />
+                            <span className="text-muted-foreground mr-2">Daily Limit:</span>
+                            <span className="font-medium">{subscription.plan.daily_limit} requests</span>
+                          </motion.div>
+
+                          <motion.div
+                            className="flex items-center"
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.3 }}
+                          >
+                            <Clock className="h-5 w-5 mr-2 text-muted-foreground" />
+                            <span className="text-muted-foreground mr-2">Duration:</span>
+                            <span className="font-medium">{subscription.plan.duration} days</span>
+                          </motion.div>
+                        </div>
                       ) : (
                         <>
                           <motion.div

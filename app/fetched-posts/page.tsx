@@ -161,6 +161,29 @@ export default function FetchedPosts() {
         return
       }
 
+      // Record this activity in the user's recent activity
+      try {
+        await fetchWithAuth(
+          "http://127.0.0.1:8000/api/record-activity/",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              action_type: "Paraphrased",
+              details: post.title,
+              url: post.source,
+            }),
+          },
+          router,
+          toast,
+        )
+      } catch (activityError) {
+        console.error("Error recording activity:", activityError)
+        // Continue even if recording activity fails
+      }
+
       // Store the paraphrased content in localStorage
       localStorage.setItem("paraphrasedContent", JSON.stringify(data))
 

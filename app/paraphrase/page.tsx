@@ -322,6 +322,29 @@ export default function Paraphrase() {
           variant: "destructive",
         })
       } else {
+        // Record this activity in the user's recent activity
+        try {
+          await fetchWithAuth(
+            "http://127.0.0.1:8000/api/record-activity/",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                action_type: "Published",
+                details: originalTitle,
+                url: originalUrl,
+              }),
+            },
+            router,
+            toast,
+          )
+        } catch (activityError) {
+          console.error("Error recording activity:", activityError)
+          // Continue even if recording activity fails
+        }
+
         toast({
           title: "Success",
           description: "Content published successfully",

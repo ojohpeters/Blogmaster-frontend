@@ -1,10 +1,15 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { useToast } from "@/components/ui/use-toast"
-import { Loader2, ExternalLink } from "lucide-react"
+import { Loader2, ExternalLink, ArrowRight } from "lucide-react"
+import { isAuthenticated, fetchWithAuth } from "@/lib/utils"
+import { useUser } from "@/lib/user-context"
+import { useSubscription } from "@/lib/subscription-context"
 
 export default function MakePost() {
   const [posts, setPosts] = useState<{ title: string; url: string }[]>([])
@@ -12,43 +17,61 @@ export default function MakePost() {
   const [isParaphrasing, setIsParaphrasing] = useState(false)
   const [accessToken, setAccessToken] = useState<string | null>(null)
   const { toast } = useToast()
+  const router = useRouter()
+  const { user } = useUser()
+  const { hasActivePlan, isLoading: isLoadingSubscription } = useSubscription()
 
   useEffect(() => {
-    // Get access token from localStorage or session
-    const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken")
-    setAccessToken(token)
-  }, [])
+    // Check if user is authenticated
+    if (!isAuthenticated()) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to access this page.",
+        variant: "destructive",
+      })
+      router.push("/auth/login?returnUrl=" + encodeURIComponent(window.location.pathname))
+      return
+    }
 
+    // Get access token from localStorage
+    const token = localStorage.getItem("authToken")
+    setAccessToken(token)
+  }, [router, toast])
+
+  // Add error handling for subscription-related errors
   const fetchUrls = async () => {
     setIsLoading(true)
     try {
-      if (!accessToken) {
-        toast({
-          title: "Authentication required",
-          description: "Please log in to fetch posts.",
-          variant: "destructive",
-        })
-        return
-      }
-
-      const response = await fetch("http://127.0.0.1:5000/latest_posts", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
+      const response = await fetchWithAuth(
+        "http://127.0.0.1:8000/api/fetch-news/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          // You can also include a body if needed:
+          // body: JSON.stringify({ key: "value" }),
         },
-      })
-
-      if (response.status === 401) {
-        toast({
-          title: "Authentication error",
-          description: "Your session has expired. Please log in again.",
-          variant: "destructive",
-        })
-        return
-      }
+        router,
+        typeof toast === "function" ? toast : toast.toast,
+      )
 
       if (!response.ok) {
-        throw new Error("Failed to fetch posts")
+        // Check for subscription-related errors
+        if (response.status === 403) {
+          const errorData = await response.json()
+          if (errorData.detail && errorData.detail.includes("subscription")) {
+            toast({
+              title: "Subscription required",
+              description: "Your subscription has expired. Please renew to use this feature.",
+              variant: "destructive",
+            })
+            router.push("/dashboard/subscription")
+            return
+          }
+        }
+        // Don't throw an error here, just return to avoid double error messages
+        return
       }
 
       const data = await response.json()
@@ -59,61 +82,81 @@ export default function MakePost() {
         description: `Retrieved ${postsArray.length} posts.`,
       })
     } catch (error) {
-      // Only show one error message
-      toast({
-        title: "Error fetching posts",
-        description:
-          error instanceof Error ? error.message : "An error occurred while fetching posts. Please try again.",
-        variant: "destructive",
-      })
+      // Only show error message if it wasn't already handled
+      if (!(error instanceof Error && error.message === "Session expired")) {
+        toast({
+          title: "Error fetching posts",
+          description: "An error occurred while fetching posts. Please try again.",
+          variant: "destructive",
+        })
+      }
     } finally {
       setIsLoading(false)
     }
   }
 
+  // Update the handleParaphrase function to use the subscription context
   const handleParaphrase = async (title: string, url: string) => {
+    // Check if user has active plan before making the request
+    if (!hasActivePlan) {
+      toast({
+        title: "Subscription required",
+        description: "Your subscription has expired. Please renew to use this feature.",
+        variant: "destructive",
+      })
+      router.push("/dashboard/subscription")
+      return
+    }
+
     setIsParaphrasing(true)
     try {
-      if (!accessToken) {
-        toast({
-          title: "Authentication required",
-          description: "Please log in to paraphrase content.",
-          variant: "destructive",
-        })
-        return
-      }
-
-      const response = await fetch("http://127.0.0.1:5000/paraphrase", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
+      const response = await fetchWithAuth(
+        "http://127.0.0.1:8000/api/paraphrase/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ title, url }),
         },
-        body: JSON.stringify({ title, url }),
-      })
-
-      if (response.status === 401) {
-        toast({
-          title: "Authentication error",
-          description: "Your session has expired. Please log in again.",
-          variant: "destructive",
-        })
-        return
-      }
+        router,
+        toast,
+      )
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => null)
-        if (errorData && errorData.error) {
-          throw new Error(errorData.error)
-        } else {
-          throw new Error("Failed to paraphrase")
+        // Check for subscription-related errors
+        if (response.status === 403) {
+          const errorData = await response.json()
+          if (errorData.detail && errorData.detail.includes("subscription")) {
+            toast({
+              title: "Subscription required",
+              description: "Your subscription has expired. Please renew to use this feature.",
+              variant: "destructive",
+            })
+            router.push("/dashboard/subscription")
+            return
+          }
         }
+
+        // Don't throw an error here, just return to avoid double error messages
+        return
       }
 
       const data = await response.json()
 
       // Don't throw an error here, just handle it directly
       if (data.error) {
+        // Check if error is subscription related
+        if (data.error.toLowerCase().includes("subscription")) {
+          toast({
+            title: "Subscription required",
+            description: "Your subscription has expired. Please renew to use this feature.",
+            variant: "destructive",
+          })
+          router.push("/dashboard/subscription")
+          return
+        }
+
         toast({
           title: "Paraphrasing error",
           description: data.error,
@@ -122,17 +165,20 @@ export default function MakePost() {
         return
       }
 
-      toast({
-        title: "Paraphrasing successful",
-        description: "The post has been paraphrased successfully.",
-      })
+      // Store the paraphrased content in localStorage
+      localStorage.setItem("paraphrasedContent", JSON.stringify(data))
+
+      // Redirect to the paraphrase page
+      router.push("/paraphrase")
     } catch (error) {
-      // Only show one error message
-      toast({
-        title: "Error paraphrasing",
-        description: error instanceof Error ? error.message : "An error occurred while paraphrasing. Please try again.",
-        variant: "destructive",
-      })
+      // Only show error message if it wasn't already handled
+      if (!(error instanceof Error && error.message === "Session expired")) {
+        toast({
+          title: "Error paraphrasing",
+          description: "An error occurred while paraphrasing. Please try again.",
+          variant: "destructive",
+        })
+      }
     } finally {
       setIsParaphrasing(false)
     }
@@ -141,6 +187,39 @@ export default function MakePost() {
   return (
     <div className="space-y-6">
       <h2 className="text-3xl font-bold">Make Post</h2>
+
+      {/* Add information card about fetched-posts page */}
+      <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg text-blue-800 dark:text-blue-200">Pro Tip: Quick Paraphrasing</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-blue-700 dark:text-blue-300">
+            Looking for a faster way to paraphrase your posts? Check out the Fetched Posts page where you can directly
+            paraphrase your content without additional steps.
+          </p>
+        </CardContent>
+        <CardFooter>
+          <Link href="/fetched-posts">
+            <Button
+              variant="outline"
+              className="text-blue-600 dark:text-blue-300 border-blue-300 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-800/50"
+            >
+              Go to Fetched Posts
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
+        </CardFooter>
+      </Card>
+
+      {/* Show loading indicator while checking subscription */}
+      {isLoadingSubscription ? (
+        <div className="flex items-center justify-center h-12">
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mr-2" />
+          <span className="text-muted-foreground">Checking subscription status...</span>
+        </div>
+      ) : null}
+
       <Card>
         <CardHeader>
           <CardTitle>Fetch Posts</CardTitle>
@@ -191,7 +270,7 @@ export default function MakePost() {
                       size="sm"
                       className="flex-grow sm:flex-grow-0"
                       onClick={() => handleParaphrase(post.title, post.url)}
-                      disabled={isParaphrasing}
+                      disabled={isParaphrasing || !hasActivePlan}
                     >
                       {isParaphrasing ? (
                         <>

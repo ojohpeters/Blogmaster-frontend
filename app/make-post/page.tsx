@@ -9,17 +9,17 @@ import { useToast } from "@/components/ui/use-toast"
 import { Loader2, ExternalLink, ArrowRight } from "lucide-react"
 import { isAuthenticated, fetchWithAuth } from "@/lib/utils"
 import { useUser } from "@/lib/user-context"
+import { useSubscription } from "@/lib/subscription-context"
 
 export default function MakePost() {
   const [posts, setPosts] = useState<{ title: string; url: string }[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isParaphrasing, setIsParaphrasing] = useState(false)
   const [accessToken, setAccessToken] = useState<string | null>(null)
-  const [subscription, setSubscription] = useState<any>(null)
-  const [isLoadingSubscription, setIsLoadingSubscription] = useState(true)
   const { toast } = useToast()
   const router = useRouter()
   const { user } = useUser()
+  const { hasActivePlan, isLoading: isLoadingSubscription } = useSubscription()
 
   useEffect(() => {
     // Check if user is authenticated
@@ -36,31 +36,7 @@ export default function MakePost() {
     // Get access token from localStorage
     const token = localStorage.getItem("authToken")
     setAccessToken(token)
-
-    // Fetch subscription details
-    fetchSubscriptionDetails()
   }, [router, toast])
-
-  const fetchSubscriptionDetails = async () => {
-    setIsLoadingSubscription(true)
-    try {
-      const response = await fetchWithAuth("http://127.0.0.1:8000/api/subscription/details/", {}, router, toast)
-
-      if (response.ok) {
-        const data = await response.json()
-        setSubscription(data)
-      } else {
-        console.error("Failed to fetch subscription details:", response.status)
-      }
-    } catch (error) {
-      console.error("Error fetching subscription details:", error)
-    } finally {
-      setIsLoadingSubscription(false)
-    }
-  }
-
-  // Check if subscription is active
-  const hasActivePlan = subscription?.status === "active"
 
   // Add error handling for subscription-related errors
   const fetchUrls = async () => {
@@ -69,12 +45,15 @@ export default function MakePost() {
       const response = await fetchWithAuth(
         "http://127.0.0.1:8000/api/fetch-news/",
         {
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
+          // You can also include a body if needed:
+          // body: JSON.stringify({ key: "value" }),
         },
         router,
-        toast,
+        typeof toast === "function" ? toast : toast.toast,
       )
 
       if (!response.ok) {
@@ -98,6 +77,29 @@ export default function MakePost() {
       const data = await response.json()
       const postsArray = Object.entries(data).map(([title, url]) => ({ title, url: url as string }))
       setPosts(postsArray)
+
+      // Record this activity in the user's recent activity
+      try {
+        await fetchWithAuth(
+          "http://127.0.0.1:8000/api/record-activity/",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              action_type: "Fetched",
+              details: `${postsArray.length} posts from WordPress`,
+            }),
+          },
+          router,
+          toast,
+        )
+      } catch (activityError) {
+        console.error("Error recording activity:", activityError)
+        // Continue even if recording activity fails
+      }
+
       toast({
         title: "Posts fetched successfully",
         description: `Retrieved ${postsArray.length} posts.`,
@@ -116,7 +118,7 @@ export default function MakePost() {
     }
   }
 
-  // Update the handleParaphrase function to properly check subscription status
+  // Update the handleParaphrase function to use the subscription context
   const handleParaphrase = async (title: string, url: string) => {
     // Check if user has active plan before making the request
     if (!hasActivePlan) {
@@ -178,6 +180,18 @@ export default function MakePost() {
           return
         }
 
+        // Check for daily request limit error
+        if (data.error === "Your daily request limit is reached") {
+          toast({
+            title: "Daily limit reached",
+            description:
+              "You've reached your daily request limit. Upgrade to a higher plan for more requests or try again tomorrow.",
+            variant: "destructive",
+          })
+          router.push("/pricing")
+          return
+        }
+
         toast({
           title: "Paraphrasing error",
           description: data.error,
@@ -233,49 +247,13 @@ export default function MakePost() {
         </CardFooter>
       </Card>
 
-      {/* Show warning for expired subscription */}
+      {/* Show loading indicator while checking subscription */}
       {isLoadingSubscription ? (
         <div className="flex items-center justify-center h-12">
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mr-2" />
           <span className="text-muted-foreground">Checking subscription status...</span>
         </div>
-      ) : (
-        !hasActivePlan && (
-          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mb-6">
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
-                <svg
-                  className="h-5 w-5 text-amber-400"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-amber-800 dark:text-amber-200">Subscription expired</h3>
-                <div className="mt-2 text-sm text-amber-700 dark:text-amber-300">
-                  <p>
-                    Your subscription has expired. You can view posts but paraphrasing is unavailable.{" "}
-                    <a
-                      href="/dashboard/subscription"
-                      className="font-medium underline hover:text-amber-800 dark:hover:text-amber-100"
-                    >
-                      Renew now
-                    </a>{" "}
-                    to regain full access.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )
-      )}
+      ) : null}
 
       <Card>
         <CardHeader>

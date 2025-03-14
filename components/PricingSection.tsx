@@ -16,10 +16,6 @@ interface SubscriptionPlan {
   price: string
   daily_limit: number
   duration: number
-  description: {
-    title: string
-    details: string[]
-  }
 }
 
 export default function PricingSection() {
@@ -133,12 +129,26 @@ export default function PricingSection() {
           <span className="text-sm font-normal text-muted-foreground">/month</span>
         </p>
         <ul className="space-y-3 mb-6">
-          {featuredPlan.description.details.slice(0, 4).map((detail, index) => (
-            <li key={index} className="flex items-center">
-              <CheckCircle className="mr-2 h-5 w-5 text-green-500 flex-shrink-0" />
-              <span>{detail}</span>
-            </li>
-          ))}
+          <li className="flex items-center">
+            <CheckCircle className="mr-2 h-5 w-5 text-green-500 flex-shrink-0" />
+            <span>
+              <strong>{featuredPlan.daily_limit}</strong> requests per day
+            </span>
+          </li>
+          <li className="flex items-center">
+            <CheckCircle className="mr-2 h-5 w-5 text-green-500 flex-shrink-0" />
+            <span>
+              <strong>{featuredPlan.duration}</strong> days of access
+            </span>
+          </li>
+          <li className="flex items-center">
+            <CheckCircle className="mr-2 h-5 w-5 text-green-500 flex-shrink-0" />
+            <span>AI-powered paraphrasing</span>
+          </li>
+          <li className="flex items-center">
+            <CheckCircle className="mr-2 h-5 w-5 text-green-500 flex-shrink-0" />
+            <span>24/7 support</span>
+          </li>
         </ul>
         <Button className="w-full group relative overflow-hidden" onClick={() => handleSubscribe(featuredPlan.id)}>
           <span className="relative z-10 flex items-center justify-center">

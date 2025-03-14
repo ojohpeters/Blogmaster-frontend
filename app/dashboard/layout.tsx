@@ -161,9 +161,8 @@ export default function DashboardLayout({
   return (
     <LogoutContext.Provider value={handleLogout}>
       <UserContext.Provider value={{ hasSubscribedBefore, hasActivePlan }}>
-        <div className="flex flex-col min-h-screen">
-          <main className="flex-grow container mx-auto px-4 py-8">{children}</main>
-        </div>
+        {/* No additional wrapper divs that might interfere with navigation */}
+        {children}
       </UserContext.Provider>
     </LogoutContext.Provider>
   )

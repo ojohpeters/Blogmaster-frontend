@@ -205,16 +205,26 @@ export default function UrlParaphraser() {
                 The URL Paraphraser allows you to instantly rewrite content from any URL with our advanced AI. Upgrade
                 to the Ultimate plan to unlock this powerful feature and enhance your content creation workflow.
               </p>
-              {subscription && subscription.plan && subscription.plan.description && (
+              {subscription && subscription.plan && (
                 <div className="bg-amber-50/50 dark:bg-amber-900/10 p-4 rounded-lg mb-4">
                   <h4 className="font-medium text-amber-800 dark:text-amber-200 mb-2">Ultimate Plan Features:</h4>
                   <ul className="space-y-2">
-                    {subscription.plan.description.details.map((detail, index) => (
-                      <li key={index} className="flex items-start text-sm text-amber-700 dark:text-amber-300">
-                        <CheckCircle className="h-4 w-4 text-amber-500 mr-2 mt-0.5 flex-shrink-0" />
-                        <span>{detail}</span>
-                      </li>
-                    ))}
+                    <li className="flex items-start text-sm text-amber-700 dark:text-amber-300">
+                      <CheckCircle className="h-4 w-4 text-amber-500 mr-2 mt-0.5 flex-shrink-0" />
+                      <span>Unlimited daily requests</span>
+                    </li>
+                    <li className="flex items-start text-sm text-amber-700 dark:text-amber-300">
+                      <CheckCircle className="h-4 w-4 text-amber-500 mr-2 mt-0.5 flex-shrink-0" />
+                      <span>URL content paraphrasing</span>
+                    </li>
+                    <li className="flex items-start text-sm text-amber-700 dark:text-amber-300">
+                      <CheckCircle className="h-4 w-4 text-amber-500 mr-2 mt-0.5 flex-shrink-0" />
+                      <span>Advanced SEO tools</span>
+                    </li>
+                    <li className="flex items-start text-sm text-amber-700 dark:text-amber-300">
+                      <CheckCircle className="h-4 w-4 text-amber-500 mr-2 mt-0.5 flex-shrink-0" />
+                      <span>Priority support</span>
+                    </li>
                   </ul>
                 </div>
               )}
